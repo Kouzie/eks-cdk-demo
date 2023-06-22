@@ -22,6 +22,8 @@ public class EckDemoApp {
                 .build();
         EckDemoVpc eckDemoVpc = new EckDemoVpc(app, "EckDemoVpc", props);
         EckDemoCluster eckDemoCluster =  new EckDemoCluster(app, "EckDemoCluster", props, eckDemoVpc.vpc);
+        EckDemoDatabase eckDemoDatabase = new EckDemoDatabase(app, "EckDemoDatabase", props, eckDemoVpc.vpc);
+        EckDemoWebService eckDemoWebService = new EckDemoWebService(app, "EckDemoWebService", props, eckDemoVpc.vpc);
         app.synth();
     }
 }

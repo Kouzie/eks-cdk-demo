@@ -26,7 +26,8 @@ Enjoy!
 ```shell
 cdk bootstrap
 cdk synth
-cdk deploy
+cdk deploy EckDemoVpc
+cdk deploy EckDemoCluster
 ```
 
 ### cluster 생성 확인 및 .kube/config 업데이트
@@ -34,9 +35,11 @@ cdk deploy
 ```shell
 aws eks list-clusters
 
+export ACCOUNT_ID=551...
+
 aws eks --region ap-northeast-2 update-kubeconfig \
     --name eks-work-cluster \
-    --role-arn arn:aws:iam::...:role/eks-work-kubectl-role
+    --role-arn arn:aws:iam::$ACCOUNT_ID\:role/eks-work-kubectl-role
 # ~/.kube/config 에 context 확인
 kubectl config get-contexts
 ```
@@ -74,4 +77,10 @@ data:
     ...
 kind: ConfigMap
 ...
+```
+
+### RDS 추가  
+
+```shell
+cdk deploy EckDemoDatabase
 ```

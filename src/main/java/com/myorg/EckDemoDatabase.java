@@ -3,6 +3,7 @@ package com.myorg;
 import software.amazon.awscdk.SecretValue;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
+import software.amazon.awscdk.services.cloudwatch.MetricOptions;
 import software.amazon.awscdk.services.ec2.Peer;
 import software.amazon.awscdk.services.ec2.Port;
 import software.amazon.awscdk.services.ec2.SecurityGroup;
@@ -25,15 +26,23 @@ public class EckDemoDatabase extends Stack {
                 .build();
         sgPostgre.addIngressRule(Peer.anyIpv4(), Port.tcp(5432));
 
-        String databaseUsername = "admin";
-        String databasePassword = "password";
-        ServerlessCluster databaseCluster = new ServerlessCluster(this, "-ueyes-serverless-database", ServerlessClusterProps.builder()
+        String databaseUsername = "mywork";
+        String databasePassword = "myworkpassword";
+
+        // aurora serverless v2
+        DatabaseCluster dbCluster = DatabaseCluster.Builder.create(this, "eks-work-db-postgre")
+                .vpc(vpc)
+                .writer(ClusterInstance.serverlessV2("eks-work-db-postgre-serverless",
+                        ServerlessV2ClusterInstanceProps.builder().build())
+                )
                 .engine(DatabaseClusterEngine.auroraPostgres(AuroraPostgresClusterEngineProps.builder()
-                        .version(AuroraPostgresEngineVersion.VER_15_2)
+                        .version(AuroraPostgresEngineVersion.VER_14_7)
                         .build()))
                 .credentials(Credentials.fromPassword(databaseUsername, SecretValue.plainText(databasePassword))) // id: admin, pw: secret
-                .vpc(vpc)
                 .securityGroups(Collections.singletonList(sgPostgre))
-                .build());
+                .serverlessV2MinCapacity(2)
+                .serverlessV2MaxCapacity(4)
+                .defaultDatabaseName("myworkdb")
+                .build();
     }
 }
