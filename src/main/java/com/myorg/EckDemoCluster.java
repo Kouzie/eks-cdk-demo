@@ -41,6 +41,7 @@ public class EckDemoCluster extends Stack {
                 .role(eksClusterRole) // control plane role
                 .mastersRole(clusterAdmin) // kubectl access role
                 .build();
+        eksCluster.getDefaultNodegroup().getRole().addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName("CloudWatchAgentServerPolicy"));
 //        eksCluster.addAutoScalingGroupCapacity("eks-work-auto-scale-group", AutoScalingGroupCapacityOptions.builder()
 //                .autoScalingGroupName("eks-work-auto-scale-group")
 //                .instanceType(InstanceType.of(InstanceClass.T2, InstanceSize.SMALL))

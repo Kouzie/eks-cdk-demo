@@ -84,3 +84,10 @@ kind: ConfigMap
 ```shell
 cdk deploy EckDemoDatabase
 ```
+
+
+### 모니터링
+
+> <https://docs.aws.amazon.com/ko_kr/AmazonCloudWatch/latest/monitoring/Container-Insights-setup-metrics.html>
+
+
