@@ -35,7 +35,7 @@ cdk deploy EckDemoCluster
 ```shell
 aws eks list-clusters
 
-export ACCOUNT_ID=551...
+export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 
 aws eks --region ap-northeast-2 update-kubeconfig \
     --name eks-work-cluster \
@@ -85,9 +85,45 @@ kind: ConfigMap
 cdk deploy EckDemoDatabase
 ```
 
-
 ### 모니터링
 
 > <https://docs.aws.amazon.com/ko_kr/AmazonCloudWatch/latest/monitoring/Container-Insights-setup-metrics.html>
 
+### Amazone EBS 드라이버  
 
+> <https://docs.aws.amazon.com/ko_kr/eks/latest/userguide/ebs-csi.html>
+
+```shell
+export CLUSTER_NAME=eks-work-cluster 
+export ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
+
+# Amazon EBS CSI 플러그인 위한 role 추가
+eksctl create iamserviceaccount \
+--name ebs-csi-controller-sa \
+--namespace kube-system \
+--cluster ${CLUSTER_NAME} \
+--role-name AmazonEKS_EBS_CSI_DriverRole \
+--role-only \
+--attach-policy-arn arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy \
+--approve
+
+# EBS CSI 드라이버 버전 확인
+aws eks describe-addon-versions --addon-name aws-ebs-csi-driver
+
+# EBS CSI 드라이버 설치
+eksctl create addon --name aws-ebs-csi-driver \
+  --cluster ${CLUSTER_NAME} \
+  --service-account-role-arn arn:aws:iam::${ACCOUNT_ID}:role/AmazonEKS_EBS_CSI_DriverRole --force
+  
+# 설치된 EBS CSI 드라이버 버전 확인
+eksctl get addon --name aws-ebs-csi-driver --cluster ${CLUSTER_NAME}
+
+# 드라이버 업데이트 명령어
+eksctl update addon --name aws-ebs-csi-driver \
+  --version ${EBS_DRIVER_UPDATE_VERSION} \
+  --cluster ${CLUSTER_NAME} --force
+  
+# 드라이버 제거
+eksctl delete addon --cluster ${CLUSTER_NAME} --name aws-ebs-csi-driver --preserve
+
+```
